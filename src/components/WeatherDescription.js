@@ -1,12 +1,11 @@
 import React from 'react';
 
 function WeatherDescription(props) {
-    const { main, description, icon } = props
+    const { main, description } = props
     return (
         <div>
             <div>Title: {main}</div>
             <div>Desc: {description}</div>
-            <div>Icon: {icon}</div>
         </div>
     )
 }

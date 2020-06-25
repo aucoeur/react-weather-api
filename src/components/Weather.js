@@ -11,8 +11,10 @@ class Weather extends Component {
     super(props)
 
     this.state = {
-      inputValue: '94010',     // Used to hold value entered in the input field
+      inputValue: '',
+      unit: 'C',     // Used to hold value entered in the input field
       weatherData: null,  // Used to hold data loaded from the weather API
+      status: 'idle'
     }
   }
 
@@ -31,18 +33,27 @@ class Weather extends Component {
       return res.json()
     }).then((json) => {
       // If the request was successful assign the data to component state
-      this.setState({ weatherData: json })
+      this.setState({ weatherData: json, status: null })
       // ! This needs better error checking here or at renderWeather() 
       // It's possible to get a valid JSON response that is not weather 
       // data, for example when a bad zip code entered.
     }).catch((err) => {
       // If there is no data 
-      this.setState({ weatherData: null }) // Clear the weather data we don't have any to display
+      this.setState({ weatherData: null, status: "idle" }) // Clear the weather data we don't have any to display
       // Print an error to the console. 
       console.log('-- Error fetching --')
       console.log(err.message)
       // You may want to display an error to the screen here. 
     })
+  }
+
+  checkStatus() {
+    if (this.state.status === "idle") {
+      return <div>Please enter your zipcode</div>
+    } else if (this.state.status === "loading") {
+      return <div>Fetching...</div>
+    }
+    return this.renderWeather()
   }
 
   renderWeather() {
@@ -61,11 +72,11 @@ class Weather extends Component {
     // Take the weather data apart to more easily populate the component
     const { main, description, icon } = this.state.weatherData.weather[0]
     const { temp, pressure, humidity, temp_min, temp_max } = this.state.weatherData.main 
-    
+
     return (
       <div>
         <WeatherDescription main={main} description={description} icon={icon} />
-        <Temperature temp={temp} temp_min={temp_min} temp_max={temp_max} />
+        <Temperature temp={temp} temp_min={temp_min} temp_max={temp_max} unit={this.state.unit} />
         <Atmosphere pressure={pressure} humidity={humidity}/>
       </div>
     )
@@ -73,7 +84,7 @@ class Weather extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div className="Weather">
 
         {/** This input uses the controlled component pattern */}
         <form onSubmit={e => this.handleSubmit(e)}>
@@ -83,20 +94,52 @@ class Weather extends Component {
           Set the value of the input to a value held in component state
           Set the value held in component state when a change occurs at the input 
           */}
+
           <input 
             value={this.state.inputValue} 
             onChange={e => this.setState({ inputValue: e.target.value })}
             type="text" 
             pattern="(\d{5}([\-]\d{4})?)"
             placeholder="enter zip"
-          />
+          />  
 
           <button type="submit">Submit</button>
 
-        </form>
+          <div className='Radio'>
 
+            <div className='row'>
+              <input 
+                type="radio"
+                value="C"
+                checked={this.state.unit === "C"}
+                onChange={e => this.setState({ unit: "C" })}
+              /> <label htmlFor="C">Celcius</label>
+            </div>
+
+            <div className='row'>
+              <input 
+                type="radio"
+                value="F"
+                checked={this.state.unit === "F"}
+                onChange={e => this.setState({ unit: "F" })}
+              /> <label htmlFor="F">Fahrenheit</label> 
+            </div>
+
+            <div className='row'>
+              <input 
+                type="radio"
+                value="K"
+                checked={this.state.unit === "K"}
+                onChange={e => this.setState({ unit: "K" })}
+              /> <label htmlFor="K">Kelvin</label>
+            </div>
+          </div>
+        </form>
+        
         {/** Conditionally render this component */}
-        {this.renderWeather()}
+        <div className="Description">
+          {this.checkStatus()}
+        </div>
 
       </div>
     );
