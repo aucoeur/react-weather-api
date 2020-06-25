@@ -3,6 +3,8 @@ import Atmosphere from './Atmosphere';
 import Temperature from './Temperature';
 import WeatherDescription from './WeatherDescription';
 
+import './Weather.css'
+
 class Weather extends Component {
 
   constructor(props) {
@@ -22,6 +24,7 @@ class Weather extends Component {
     const zip = this.state.inputValue
     // Form an API request URL with the apikey and zip
     const url = `https://api.openweathermap.org/data/2.5/weather?zip=${zip},us&appid=${apikey}`
+    
     // Get data from the API with fetch
     fetch(url).then(res => {
       // Handle the response stream as JSON

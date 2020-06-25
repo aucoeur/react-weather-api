@@ -3,7 +3,7 @@ import React from 'react';
 function Temperature(props) {
     const { temp, temp_min, temp_max}  = props
     function convertF(temp) {
-        return (temp * (9/5) - 459.67).toFixed(2)
+        return (temp * (9/5) - 459.67).toFixed(1)
     }
 
     return (

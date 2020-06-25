@@ -1,6 +1,6 @@
 
 import React from 'react';
-
+import Sun from './sun.svg';
 import Weather from './components/Weather';
 import './App.css';
 
@@ -23,7 +23,12 @@ import './App.css';
 
 function App() {
   return(
-    <Weather />
+     <div className="App">
+        <div className="container">
+          <img src={Sun} className="App-logo" alt="logo" />
+          <Weather />
+        </div>
+     </div>
   )
 }
 
