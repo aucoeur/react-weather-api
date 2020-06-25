@@ -14,7 +14,8 @@ class Weather extends Component {
       inputValue: '',
       unit: 'C',     // Used to hold value entered in the input field
       weatherData: null,  // Used to hold data loaded from the weather API
-      status: 'idle'
+      status: 'idle',
+      error: null
     }
   }
 
@@ -33,13 +34,19 @@ class Weather extends Component {
       return res.json()
     }).then((json) => {
       // If the request was successful assign the data to component state
-      this.setState({ weatherData: json, status: null })
+      this.setState({ weatherData: json, status: "success" })
       // ! This needs better error checking here or at renderWeather() 
       // It's possible to get a valid JSON response that is not weather 
       // data, for example when a bad zip code entered.
+      if (this.state.weatherData.cod !== 200) {
+            // If OpenWeather returns status error
+          this.setState( { weatherData: json, error: json.message, status: 'error' })
+        }
+      console.log(json.cod , json.message)
     }).catch((err) => {
       // If there is no data 
-      this.setState({ weatherData: null, status: "idle" }) // Clear the weather data we don't have any to display
+      this.setState({ weatherData: null, status: 'error' }) // Clear the weather data we don't have any to display
+
       // Print an error to the console. 
       console.log('-- Error fetching --')
       console.log(err.message)
@@ -49,9 +56,11 @@ class Weather extends Component {
 
   checkStatus() {
     if (this.state.status === "idle") {
-      return <div>Please enter your zipcode</div>
+      return (<div>Please enter your zipcode</div>)
     } else if (this.state.status === "loading") {
-      return <div>Fetching...</div>
+      return (<div>Fetching...</div>)
+    } else if (this.state.status === 'error') {
+      return (<div>Invalid</div>)
     }
     return this.renderWeather()
   }
@@ -61,7 +70,7 @@ class Weather extends Component {
     if (this.state.weatherData === null) {
       // If there is no data return undefined
       return undefined
-    }
+    } 
 
     /* 
     This next step needs another level of error checking. It's 
@@ -69,17 +78,19 @@ class Weather extends Component {
     case the step below fails. 
     */ 
     console.log(this.state.weatherData)
-    // Take the weather data apart to more easily populate the component
-    const { main, description, icon } = this.state.weatherData.weather[0]
-    const { temp, pressure, humidity, temp_min, temp_max } = this.state.weatherData.main 
+    if (this.state.weatherData.cod === 200) {
+      // Take the weather data apart to more easily populate the component
+      const { main, description, icon } = this.state.weatherData.weather[0]
+      const { temp, pressure, humidity, temp_min, temp_max } = this.state.weatherData.main 
 
-    return (
-      <div>
-        <WeatherDescription main={main} description={description} icon={icon} />
-        <Temperature temp={temp} temp_min={temp_min} temp_max={temp_max} unit={this.state.unit} />
-        <Atmosphere pressure={pressure} humidity={humidity}/>
-      </div>
-    )
+      return (
+        <div>
+          <WeatherDescription main={main} description={description} icon={icon} />
+          <Temperature temp={temp} temp_min={temp_min} temp_max={temp_max} unit={this.state.unit} />
+          <Atmosphere pressure={pressure} humidity={humidity}/>
+        </div>
+      )
+    }
   }
 
   render() {
@@ -135,7 +146,7 @@ class Weather extends Component {
             </div>
           </div>
         </form>
-        
+
         {/** Conditionally render this component */}
         <div className="Description">
           {this.checkStatus()}
