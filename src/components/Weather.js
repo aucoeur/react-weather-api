@@ -19,6 +19,33 @@ class Weather extends Component {
     }
   }
 
+
+  // async example of handleSubmit
+  async handleAsyncSubmit(e) {
+    e.preventDefault()
+    // ! Get your own API key ! 
+    const apikey = process.env.REACT_APP_OPENWEATHERMAP_API_KEY
+    // Get the zip from the input
+    const zip = this.state.inputValue
+    // Form an API request URL with the apikey and zip
+    const url = `https://api.openweathermap.org/data/2.5/weather?zip=${zip},us&appid=${apikey}`
+
+   try {
+    const res = await fetch(url)
+    const json = await res.json()
+    
+    this.setState({ weatherData: json, status: "success" })
+    if (this.state.weatherData.cod !== 200) {
+          // If OpenWeather returns status error
+        this.setState( { weatherData: json, error: json.message, status: 'error' })
+      }
+    console.log(json.cod , json.message)
+   } catch(err) {
+      console.log(err)
+    }
+  }
+
+
   handleSubmit(e) {
     e.preventDefault()
     // ! Get your own API key ! 
@@ -28,6 +55,23 @@ class Weather extends Component {
     // Form an API request URL with the apikey and zip
     const url = `https://api.openweathermap.org/data/2.5/weather?zip=${zip},us&appid=${apikey}`
     
+    const p1 = fetch(url)
+    const p2 = p1.then((res) => {return res.json()})
+    p2.then((json) => {
+      this.setState({ weatherData: json, status: "success" })
+      if (this.state.weatherData.cod !== 200) {
+            // If OpenWeather returns status error
+          this.setState( { weatherData: json, error: json.message, status: 'error' })
+        }
+      console.log(json.cod , json.message)
+    })
+    p2.catch((err) => {
+      console.log(err)
+    })
+
+
+
+
     // Get data from the API with fetch
     fetch(url).then(res => {
       // Handle the response stream as JSON
